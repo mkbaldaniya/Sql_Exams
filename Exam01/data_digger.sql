@@ -1,0 +1,141 @@
+-- Creating Database
+CREATE DATABASE Data_Digger;
+
+USE Data_Digger;
+
+-- Table 1------------------------------------------------------------------------------
+CREATE TABLE Customers (
+CustomersID INT PRIMARY KEY,
+Name VARCHAR(50),
+Email VARCHAR(255),
+Address VARCHAR(500)
+);
+
+INSERT INTO Customers (CustomersID, Name, Email, Address) VALUES
+(101, 'Rahul Sharma', 'rahul.sharma@gmail.com', 'Surat, Gujarat'),
+(102, 'Amit Patel', 'amit.patel@yahoo.com', 'Ahmedabad, Gujarat'),
+(103, 'Neha Verma', 'neha.verma@gmail.com', 'Mumbai, Maharashtra'),
+(104, 'Priya Singh', 'priya.singh@hotmail.com', 'Delhi, India'),
+(105, 'Rohit Mehta', 'rohit.mehta@gmail.com', 'Rajkot, Gujarat'),
+(106, 'Kajal Joshi', 'kajal.joshi@gmail.com', 'Vadodara, Gujarat'),
+(107, 'Suresh Kumar', 'suresh.kumar@yahoo.com', 'Jaipur, Rajasthan'),
+(108, 'Pooja Desai', 'pooja.desai@gmail.com', 'Surat, Gujarat'),
+(109, 'Ankit Shah', 'ankit.shah@gmail.com', 'Baroda, Gujarat'),
+(110, 'Sneha Iyer', 'sneha.iyer@gmail.com', 'Chennai, Tamil Nadu');
+
+SELECT * FROM Customers;
+
+UPDATE Customers
+SET Address = 'Rajkot, Gujarat'
+WHERE CustomersID = 103;
+
+DELETE FROM Customers WHERE CustomersID = 102;
+
+SELECT * FROM Customers WHERE Name = 'Rohit Mehta';
+
+-- Table 2------------------------------------------------------------------------------
+CREATE TABLE Orders (
+OrderID INT PRIMARY KEY,
+CustomersID INT,
+OrderDate DATE,
+TotalAmount DECIMAL(10,2),
+FOREIGN KEY (CustomersID) REFERENCES Customers(CustomersID)
+);
+
+INSERT INTO Orders (OrderID, CustomersID, OrderDate, TotalAmount) VALUES
+(1, 101, '2026-01-20', 2500.00),
+(2, 102, '2025-01-02', 1800.50),
+(3, 103, '2025-01-03', 3200.75),
+(4, 104, '2025-01-04', 1500.00),
+(5, 105, '2025-01-05', 4200.25),
+(6, 106, '2026-01-06', 900.00),
+(7, 107, '2026-01-07', 2750.60),
+(8, 108, '2025-01-08', 3600.00),
+(9, 109, '2026-01-09', 2100.90),
+(10, 110, '2025-01-10', 5000.00);
+
+SELECT * FROM Orders WHERE CustomersID = 106;
+
+SELECT * FROM Orders;
+
+UPDATE Orders
+SET TotalAmount = 5000
+WHERE OrderID = 5;
+
+DELETE FROM Orders WHERE OrderID = 5;
+
+SELECT * FROM Orders WHERE OrderDate >= current_date - interval 30 day;
+
+SELECT MAX(TotalAmount),MIN(TotalAmount),AVG(TotalAmount) FROM Orders;
+
+-- Table 3------------------------------------------------------------------------------
+CREATE TABLE Products (
+ProductID INT PRIMARY KEY,
+ProductName VARCHAR(50),
+Price DECIMAL(10,2),
+Stock INT
+);
+
+INSERT INTO Products (ProductID, ProductName, Price, Stock) VALUES
+(1, 'Laptop', 55000.00, 10),
+(2, 'Mouse', 500.00, 100),
+(3, 'Keyboard', 1200.00, 50),
+(4, 'Monitor', 15000.00, 20),
+(5, 'Printer', 18000.00, 15),
+(6, 'USB Cable', 250.00, 200),
+(7, 'Headphones', 2200.00, 40),
+(8, 'Webcam', 3500.00, 25),
+(9, 'Speaker', 4000.00, 30),
+(10, 'Hard Disk', 6500.00, 18),
+(11,'hello',6000.00,0);
+
+SELECT * FROM Products ORDER BY Price DESC;
+
+SELECT * FROM Products;
+
+UPDATE Products
+SET Price = 20000
+WHERE ProductID = 6;
+
+SELECT * FROM Products WHERE Stock = 0;
+DELETE FROM Products WHERE ProductID = 11;
+
+SELECT * FROM Products WHERE Price >= 500 AND Price<= 2000;
+
+SELECT MAX(Price) AS Expensive , MIN(Price) AS Cheapest FROM Products;
+-- Table 4------------------------------------------------------------------------------
+CREATE TABLE OrderDetails (
+OrderDetailID INT PRIMARY KEY,
+OrderID INT,
+ProductID INT,
+Quantity INT,
+SubTotal INT,
+FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+INSERT INTO OrderDetails (OrderDetailID, OrderID, ProductID, Quantity, SubTotal) VALUES
+(1, 1, 2, 2, 1000),
+(2, 1, 3, 1, 1200),
+(3, 2, 6, 4, 1000),
+(4, 3, 1, 1, 55000),
+(5, 4, 4, 1, 15000),
+(6, 5, 7, 2, 4400),
+(7, 6, 2, 1, 500),
+(8, 7, 8, 1, 3500),
+(9, 8, 9, 2, 8000),
+(10, 9, 10, 1, 6500);
+
+SELECT * FROM OrderDetails;
+
+SELECT * FROM OrderDetails WHERE OrderDetailID = 6;
+
+SELECT SUM(SubTotal) AS Total_Revenue FROM OrderDetails;
+
+SELECT * FROM OrderDetails ORDER BY Quantity DESC LIMIT 3;
+
+SELECT ProductID, COUNT(*) AS Total_Times_Sold FROM OrderDetails WHERE ProductID = 2 GROUP BY ProductID;
+
+-- -----------------------------------------------------------------------------------
+
+
