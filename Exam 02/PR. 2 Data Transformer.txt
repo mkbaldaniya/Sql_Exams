@@ -1,0 +1,179 @@
+CREATE DATABASE Data_Transformer;
+
+USE Data_Transformer; 
+-- Created tables-------------------------------------------------------------------------------------
+CREATE TABLE Customers(
+CustomerID INT PRIMARY KEY,
+FirstName VARCHAR(50),
+LastName VARCHAR(50),
+Email VARCHAR(150),
+RegistrationDATE DATE
+);
+
+SELECT * FROM Customers;
+
+INSERT INTO Customers(CustomerID,FirstName,LastName,Email,RegistrationDATE)
+VALUES
+(1,'Virat','Kohli','viratkohli@gmail.com','2025-01-05'),
+(2,'Rohit','Sharma','rohitsharma@gmail.com','2025-01-07'),
+(3,'Hardik','Pandya','hardikpandya@gmail.com','2025-01-10'),
+(4,'Ravindra','Jadeja','ravindrajadeja@gmail.com','2025-01-20'),
+(5,'Rishabh','Pant','rishabhpant@gmail.com','2025-02-02'),
+(6,'Kuldeep','Yadav','kuldeepyadav@gmail.com','2025-02-06'),
+(7,'Jasprit','Boomrah','jaspritboomrah@gmail.com','2025-02-10'),
+(8,'Mahedra Singh','Dhoni','mandrasingh@gmail.com','2025-02-15'),
+(9,'Yuvraj','Singh','yuvrajsingh@gmail.com','2025-02-18'),
+(10,'Zahir','Khan','zahirkhan@gmail.com','2025-02-26');
+
+CREATE TABLE Orders(
+OrderID INT PRIMARY KEY,
+CustomerID INT,
+OrderDate DATE,
+TotalAmount FLOAT,
+FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+INSERT INTO Orders (OrderID, CustomerID, OrderDate, TotalAmount)
+VALUES
+(101, 1, '2025-02-01', 2500.50),
+(102, 2, '2025-02-03', 1800.00),
+(103, 3, '2025-02-05', 3200.75),
+(104, 1, '2025-02-10', 1500.00),
+(105, 4, '2025-02-12', 2750.25),
+(106, 5, '2025-02-15', 4000.00),
+(107, 10, '2025-02-27', 3100.00);
+
+SELECT * FROM Orders;	
+
+CREATE TABLE Employees(
+EmployeeID INT PRIMARY KEY,
+FirstName VARCHAR(50),
+LastName VARCHAR(50),
+Department VARCHAR(60),
+HireDate DATE,
+Salary FLOAT
+);	
+
+INSERT INTO Employees (EmployeeID, FirstName, LastName, Department, HireDate, Salary)
+VALUES
+(1, 'Amit', 'Sharma', 'HR', '2022-03-15', 55000),
+(2, 'Neha', 'Verma', 'Finance', '2021-07-10', 68000),
+(3, 'Rahul', 'Mehta', 'IT', '2020-11-05', 85000),
+(4, 'Priya', 'Singh', 'Marketing', '2023-01-20', 60000),
+(5, 'Suresh', 'Kumar', 'Operations', '2019-09-12', 72000),
+(6, 'Anjali', 'Patel', 'IT', '2021-04-18', 90000),
+(7, 'Vikram', 'Rao', 'Sales', '2022-08-30', 65000),
+(8, 'Pooja', 'Nair', 'Finance', '2020-06-25', 70000),
+(9, 'Karan', 'Malhotra', 'Admin', '2023-05-10', 52000),
+(10, 'Sneha', 'Iyer', 'Marketing', '2021-12-01', 63000);
+
+
+SELECT * FROM Employees;
+
+--  ALL Queries -------------------------------------------------------------------------------------
+
+-- Inner Join----------------------------------------------------------------------------------------
+SELECT c.CustomerID,c.FirstName,c.LastName,c.Email,o.OrderID,o.OrderDate,o.TotalAmount
+FROM Customers c
+INNER JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+-- Left Join----------------------------------------------------------------------------------------
+SELECT c.CustomerID,c.FirstName,c.LastName,o.OrderID,o.OrderDate,o.TotalAmount
+FROM Customers c
+LEFT JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+-- Right Join----------------------------------------------------------------------------------------
+SELECT c.CustomerID,c.FirstName,c.LastName,o.OrderID,o.OrderDate,o.TotalAmount
+FROM Customers c
+RIGHT JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+-- Full Outer Join----------------------------------------------------------------------------------------
+SELECT c.CustomerID,c.FirstName,c.LastName,o.OrderID,o.OrderDate,o.TotalAmount
+FROM Customers c
+LEFT JOIN Orders o
+ON c.CustomerID = o.CustomerID
+UNION
+SELECT c.CustomerID,c.FirstName,c.LastName,o.OrderID,o.OrderDate,o.TotalAmount
+FROM Customers c
+RIGHT JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+-- Subquery----------------------------------------------------------------------------------------
+SELECT DISTINCT c.CustomerID, c.FirstName, c.LastName
+FROM Customers c
+JOIN Orders o
+ON c.CustomerID = o.CustomerID
+WHERE o.TotalAmount >
+(
+SELECT AVG(TotalAmount)
+FROM Orders
+);
+
+-- Subquery----------------------------------------------------------------------------------------
+SELECT EmployeeID, FirstName, LastName, Salary
+FROM Employees
+WHERE Salary >
+(
+SELECT AVG(Salary)
+FROM Employees
+);
+
+-- Extract Year and Month from---------------------------------------------------------------------
+SELECT OrderID, OrderDate, YEAR(OrderDate) AS OrderYear, MONTH(OrderDate) AS OrderMonth FROM Orders;
+
+-- Calculate difference in days between order date and current date--------------------------------
+SELECT OrderID, OrderDate, DATEDIFF(CURDATE(), OrderDate) AS DaysDifference
+FROM Orders;
+
+-- Format OrderDate--------------------------------------------------------------------------------
+SELECT OrderID, DATE_FORMAT(OrderDate, '%d-%b-%Y') AS FormattedOrderDate
+FROM Orders;
+
+-- Concatenate FirstName and LastName--------------------------------------------------------------
+SELECT CONCAT(FirstName, ' ', LastName) AS FullName
+FROM Employees;
+
+-- Replace part of a string------------------------------------------------------------------------
+SELECT REPLACE(FirstName, 'Priya', 'Priyanshu') AS UpdatedName
+FROM Employees;
+
+-- Convert FirstName to uppercase and LastName to lowercase----------------------------------------
+SELECT UPPER(FirstName) AS FirstName_Upper, LOWER(LastName) AS LastName_Lower
+FROM Employees;
+
+-- Trim extra spaces from the Email field----------------------------------------------------------
+SELECT TRIM(Email) AS CleanEmail FROM Customers;
+
+-- Calculate the running total of TotalAmount------------------------------------------------------
+SELECT OrderID, OrderDate, TotalAmount, SUM(TotalAmount) OVER (
+ORDER BY OrderDate
+ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+) AS RunningTotal
+FROM Orders;
+
+-- Rank orders based on TotalAmount using RANK()----------------------------------------------------
+SELECT OrderID, TotalAmount, RANK() OVER (ORDER BY TotalAmount DESC) AS AmountRank
+FROM Orders;
+
+-- Assign a discount based on TotalAmount-----------------------------------------------------------
+SELECT OrderID, TotalAmount,
+    CASE
+        WHEN TotalAmount > 1000 THEN '10% Discount'
+        WHEN TotalAmount > 500 THEN '5% Discount'
+        ELSE 'No Discount'
+    END AS Discount
+FROM Orders;
+
+-- Categorize employees’ salaries as high, medium, or low-------------------------------------------
+SELECT EmployeeID, Salary,
+    CASE
+        WHEN Salary >= 80000 THEN 'High'
+        WHEN Salary >= 40000 THEN 'Medium'
+        ELSE 'Low'
+    END AS SalaryCategory
+FROM Employees;
+
+-- --------------------------------------------------------------------------------------------------
